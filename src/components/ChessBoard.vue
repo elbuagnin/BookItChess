@@ -76,35 +76,47 @@
     let whitesLastMove = ref({})
     let blacksLastMove = ref({})
 
+    function toProperCase (piece) {
+        let update = piece
+        switch (piece) {
+            case 'p':
+                break;
+            case 'k':
+                update = 'K'
+                break;
+            case 'q':
+                update = 'Q'
+                break;
+            case 'r':
+                update = 'R'
+                break;
+            case 'b':
+                update = 'B'
+                break;
+            case 'n':
+                update = 'N'
+                break;
+            default:
+                break;
+        }
+        return update
+    }
+
     function PGNtoColumn () {
         let string = game.pgn( { maxWidth: 6, newline: '|' } )        
         return string.split('|')
     }
 
-    
-    function getWhitesLastMove () {
+    function lastMove (color) {
         let history = game.history( { verbose: true } )
         history.reverse()
 
         for (const move of history) {
-            if (move.color == 'w') {
+            if (move.color == color) {
+                move.piece = toProperCase(move.piece)
                 return move
             }
         }
-        
-        return ''
-    }
-
-    function getBlacksLastMove () {
-        let history = game.history( { verbose: true } )
-        history.reverse()
-
-        for (const move of history) {
-            if (move.color == 'b') {
-                return move
-            }
-        }
-        
         return ''
     }
 
@@ -171,8 +183,8 @@
     function updateStatus () {
         const whoseMoveName = game.turn() === 'w' ? 'White' : 'Black'
         whoseMove.value = whoseMoveName[0].valueOf().toLowerCase()
-        whitesLastMove.value = getWhitesLastMove()
-        blacksLastMove.value = getBlacksLastMove()
+        whitesLastMove.value = lastMove('w')
+        blacksLastMove.value = lastMove('b')
         FEN.value = game.fen()
         PGN.value = game.pgn()
         PGNlist.value = PGNtoColumn()
