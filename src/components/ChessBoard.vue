@@ -1,46 +1,48 @@
 <template>
     <v-container>
-        <v-row no-gutters class="w-100">
-            <v-col cols="2" class="bg-blue-grey pl-2 pt-2">
+        <v-row no-gutters>
+            <v-col cols="2" class="pl-4 pt-4 bg-blue-grey">
                 <p v-for="turn in PGNlist" class="text-left">{{ turn }}</p>
             </v-col>
             <v-col cols="8" class="bg-blue-grey">
-                <p class="text-h2">
+                <p class="pt-4 text-center text-h3">
                     {{ blacksLastMove.piece }}
                     {{ blacksLastMove.from }}
                     <span v-if="blacksLastMove.flags=='c'">x</span>
-                    {{ blacksLastMove.to }}           
+                    {{ blacksLastMove.to }}      
+                    <span v-if="whoseMove=='b'">...</span>
+                    <span v-if="!blacksLastMove && !whitesLastMove">...</span>
                 </p>
-                <div id="gameBoard" style="width: 400px;" class="py-4"></div>
-                <p class="text-h2">
+                
+                <v-sheet
+                    id="gameBoard"
+                    style="width: 400px;"
+                    class="mx-auto py-4 bg-transparent"
+                ></v-sheet>
+                <p class="pb-4 text-center text-h3">
                     {{ whitesLastMove.piece }}
                     {{ whitesLastMove.from }}
                     <span v-if="whitesLastMove.flags=='c'">x</span>
                     {{ whitesLastMove.to }}
+                    <span v-if="whoseMove=='w'">...</span>
                 </p>
             </v-col>
             <v-col cols="2" class="bg-blue-grey">
-                <v-sheet class="position-absolute top-0 my-16">
-                    <p v-if="whoseMove=='b'">Black to Move</p>
-                </v-sheet>
-                <v-sheet class="position-absolute bottom-0 my-16">
-                    <p v-if="whoseMove=='w'">White to Move</p>
-                </v-sheet>
+                
             </v-col>
         </v-row>
         <v-btn
             id="startBtn"
             @click="setStartPos()"
         >
-            Start Position
+            Reset
         </v-btn>
-        <label>Status:</label>
         <div id="gameStatus">{{ statusMessage }}</div>
-        <label>FEN: {{ FEN }}</label>
+        <!-- <label>FEN: {{ FEN }}</label>
         <div id="gameFEN"></div>
         <label>PGN: {{ PGN }}</label>
         <div id="gamePGN"></div>
-        <p>{{  }}</p>
+        <p>{{  }}</p> -->
     </v-container>
 </template>
 
