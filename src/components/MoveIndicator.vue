@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { Color } from '../chess'
 
     const props = defineProps({
         color: String,
@@ -11,7 +12,7 @@ import { computed } from 'vue';
         flags: String
     })
 
-    function opponentColor(color) {
+    function opponentColor(color: Color): Color {
         return color === 'w' ? 'b' : 'w'
     }
 
@@ -29,7 +30,7 @@ import { computed } from 'vue';
         <span v-if="castle == false">{{ props.from }}&nbsp;</span>
         <span v-if="flags=='c'">x</span>
         <span v-if="castle == false">{{ props.to }}&nbsp;</span>
-        <span v-if="props.check == opponentColor(props.color)">+</span>
+        <span v-if="props.check == opponentColor(props.color as Color)">+</span>
         <span v-if="flags == 'k'">O-O</span>
         <span v-if="flags == 'q'">O-O-O</span>
         <span v-if="props.whoseMove==props.color">...</span>
