@@ -47,10 +47,11 @@
     import { Chess } from 'chess.js'
     import { Chessboard2 } from '@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
     import MoveIndicator from './MoveIndicator.vue'
-    import { toProperCase, lastMove } from './helpers'
+    import { toProperCase, lastMove, isBlackPiece, isWhitePiece } from './helpers'
 </script>
 
 <script lang="js">
+    // Initialize game and chessboard modules
     const game = new Chess()
 
     const boardConfig = {
@@ -67,6 +68,7 @@
         board = new Chessboard2('gameBoard', boardConfig);
     }, 0);
 
+    // reactive variables
     let statusMessage = ref('')
     let FEN = ref('')
     let PGN = ref('')
@@ -77,19 +79,17 @@
     let check = ref('')
     let history = ref([])
 
-    function PGNtoColumn () {
-        let string = game.pgn( { maxWidth: 6, newline: '|' } )        
-        return string.split('|')
-    }
+    // Start the game
+    updateStatus()
 
+    // User action functions
     function setStartPos() {
         board.start()
         game.reset()
         updateStatus()
     }
 
-    updateStatus()
-
+    // Chess Event functions
     function onDragStart (dragStartEvt) {
         // do not pick up pieces if the game is over
         if (game.isGameOver()) return false
@@ -109,9 +109,6 @@
             board.addCircle(move.to)
         })
     }
-
-    function isWhitePiece (piece) { return /^w/.test(piece) }
-    function isBlackPiece (piece) { return /^b/.test(piece) }
 
     function onDrop (dropEvt) {
         // see if the move is legal
@@ -143,6 +140,7 @@
 
     // update DOM elements with the current game status
     function updateStatus () {
+        // Update reactive variables
         history = game.history({ verbose: true })
         const whoseMoveName = game.turn() === 'w' ? 'White' : 'Black'
         whoseMove.value = whoseMoveName[0].valueOf().toLowerCase()
@@ -150,9 +148,10 @@
         blacksLastMove.value = lastMove('b', history)
         FEN.value = game.fen()
         PGN.value = game.pgn()
-        PGNlist.value = PGNtoColumn()
+        PGNlist.value = game.pgn( { maxWidth: 6, newline: '|' } ).split('|')
         check.value = ''
         
+        // Update check & status message
         if (!game.isGameOver()) {
             if (game.inCheck()) {
                 statusMessage.value = whoseMoveName + ' is in check!'

@@ -1,4 +1,4 @@
-export function toProperCase (piece: String) {
+export function toProperCase (piece: string) {
     let update = piece
     switch (piece) {
         case 'p':
@@ -24,7 +24,7 @@ export function toProperCase (piece: String) {
     return update
 }
 
-export function lastMove (color: String, history: Array<object>) {
+export function lastMove (color: string, history: Array<object>) {
     history.reverse()
 
     for (const move of history) {
@@ -35,3 +35,6 @@ export function lastMove (color: String, history: Array<object>) {
     }
     return ''
 }
+
+export function isWhitePiece (piece: string) { return /^w/.test(piece) }
+export function isBlackPiece (piece: string) { return /^b/.test(piece) }
