@@ -2,29 +2,24 @@
     <v-container>
         <v-row no-gutters>
             <v-col cols="2" class="pl-4 pt-4 bg-blue-grey">
-                <p v-for="turn in PGNlist" class="text-left">{{ turn }}</p>
+                <p v-for="turn in PGNlist"
+                class="text-left"
+                style="overflow: scroll;"    
+            >{{ turn }}</p>
             </v-col>
             <v-col cols="8" class="bg-blue-grey">
                 <p class="pt-4 text-center text-h3">
-                    {{ blacksLastMove.piece }}
-                    {{ blacksLastMove.from }}
-                    <span v-if="blacksLastMove.flags=='c'">x</span>
-                    {{ blacksLastMove.to }}      
-                    <span v-if="whoseMove=='b'">...</span>
-                    <span v-if="!blacksLastMove && !whitesLastMove">...</span>
+                    <MoveIndicator v-bind="{ color: 'b', whoseMove: whoseMove, check: check, to: blacksLastMove.to, from: blacksLastMove.from, piece: blacksLastMove.piece, flags: blacksLastMove.flags}"/>
                 </p>
-                
+
                 <v-sheet
                     id="gameBoard"
                     style="width: 400px;"
                     class="mx-auto py-4 bg-transparent"
                 ></v-sheet>
+
                 <p class="pb-4 text-center text-h3">
-                    {{ whitesLastMove.piece }}
-                    {{ whitesLastMove.from }}
-                    <span v-if="whitesLastMove.flags=='c'">x</span>
-                    {{ whitesLastMove.to }}
-                    <span v-if="whoseMove=='w'">...</span>
+                    <MoveIndicator v-bind="{ color: 'w', whoseMove: whoseMove, check: check, to: whitesLastMove.to, from: whitesLastMove.from, piece: whitesLastMove.piece, flags: whitesLastMove.flags}"/>    
                 </p>
             </v-col>
             <v-col cols="2" class="bg-blue-grey">
@@ -51,6 +46,7 @@
     import jquery from 'jquery'
     import { Chess } from 'chess.js'
     import { Chessboard2 } from '@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
+    import MoveIndicator from './MoveIndicator.vue'
 </script>
 
 <script lang="js">
@@ -77,6 +73,7 @@
     let whoseMove = ref('')
     let whitesLastMove = ref({})
     let blacksLastMove = ref({})
+    let check = ref('')
 
     function toProperCase (piece) {
         let update = piece
@@ -190,9 +187,13 @@
         FEN.value = game.fen()
         PGN.value = game.pgn()
         PGNlist.value = PGNtoColumn()
+        check.value = ''
         
         if (!game.isGameOver()) {
-            if (game.inCheck()) statusMessage.value = whoseMoveName + ' is in check! '
+            if (game.inCheck()) {
+                statusMessage.value = whoseMoveName + ' is in check!'
+                check.value = whoseMove.value
+            }
         } else if (game.isCheckmate() && game.turn() === 'w') {
             statusMessage.value = 'Game over: white is in checkmate. Black wins!'
         } else if (game.isCheckmate() && game.turn() === 'b') {
