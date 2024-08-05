@@ -47,6 +47,7 @@
     import { Chess } from 'chess.js'
     import { Chessboard2 } from '@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
     import MoveIndicator from './MoveIndicator.vue'
+    import { toProperCase, lastMove } from './helpers'
 </script>
 
 <script lang="js">
@@ -74,49 +75,11 @@
     let whitesLastMove = ref({})
     let blacksLastMove = ref({})
     let check = ref('')
-
-    function toProperCase (piece) {
-        let update = piece
-        switch (piece) {
-            case 'p':
-                break;
-            case 'k':
-                update = 'K'
-                break;
-            case 'q':
-                update = 'Q'
-                break;
-            case 'r':
-                update = 'R'
-                break;
-            case 'b':
-                update = 'B'
-                break;
-            case 'n':
-                update = 'N'
-                break;
-            default:
-                break;
-        }
-        return update
-    }
+    let history = ref([])
 
     function PGNtoColumn () {
         let string = game.pgn( { maxWidth: 6, newline: '|' } )        
         return string.split('|')
-    }
-
-    function lastMove (color) {
-        let history = game.history( { verbose: true } )
-        history.reverse()
-
-        for (const move of history) {
-            if (move.color == color) {
-                move.piece = toProperCase(move.piece)
-                return move
-            }
-        }
-        return ''
     }
 
     function setStartPos() {
@@ -180,10 +143,11 @@
 
     // update DOM elements with the current game status
     function updateStatus () {
+        history = game.history({ verbose: true })
         const whoseMoveName = game.turn() === 'w' ? 'White' : 'Black'
         whoseMove.value = whoseMoveName[0].valueOf().toLowerCase()
-        whitesLastMove.value = lastMove('w')
-        blacksLastMove.value = lastMove('b')
+        whitesLastMove.value = lastMove('w', history)
+        blacksLastMove.value = lastMove('b', history)
         FEN.value = game.fen()
         PGN.value = game.pgn()
         PGNlist.value = PGNtoColumn()
