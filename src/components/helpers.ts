@@ -1,7 +1,10 @@
-export function toProperCase (piece: string) {
-    let update = piece
+import { Color, Piece, Move } from '../chess'
+
+export function toProperCase (piece: string): Piece {
+    let update: Piece
     switch (piece) {
         case 'p':
+            update = 'p'
             break;
         case 'k':
             update = 'K'
@@ -19,12 +22,13 @@ export function toProperCase (piece: string) {
             update = 'N'
             break;
         default:
-            break;
+            throw new Error('Unknown Input')
     }
-    return update
+    
+    return update 
 }
 
-export function lastMove (color: string, history: Array<object>) {
+export function lastMove (color: Color, history: Array<Move>) {
     history.reverse()
 
     for (const move of history) {
