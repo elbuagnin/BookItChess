@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import './style.css'
+//import './style.css'
 import '../node_modules/@chrisoakman/chessboard2/dist/chessboard2.min.css'
 
 // Vuetify
