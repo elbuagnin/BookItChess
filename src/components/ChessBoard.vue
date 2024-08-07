@@ -1,13 +1,13 @@
 <template>
     <v-container>
         <v-row no-gutters>
-            <v-col cols="2" class="pl-4 pt-4 bg-blue-grey">
+            <v-col cols="3" class="pl-4 pt-4 bg-blue-grey">
                 <p v-for="turn in PGNlist"
                 class="text-left"
                 style="overflow: scroll;"    
             >{{ turn }}</p>
             </v-col>
-            <v-col cols="8" class="bg-blue-grey">
+            <v-col cols="6" class="bg-blue-grey">
                 <p class="pt-4 text-center text-h3">
                     <MoveIndicator v-bind="{ color: 'b', whoseMove: whoseMove, check: check, to: blacksLastMove.to, from: blacksLastMove.from, piece: blacksLastMove.piece, flags: blacksLastMove.flags}"/>
                 </p>
@@ -22,8 +22,15 @@
                     <MoveIndicator v-bind="{ color: 'w', whoseMove: whoseMove, check: check, to: whitesLastMove.to, from: whitesLastMove.from, piece: whitesLastMove.piece, flags: whitesLastMove.flags}"/>    
                 </p>
             </v-col>
-            <v-col cols="2" class="bg-blue-grey">
+            <v-col cols="3" class="bg-blue-grey">
                 
+                <div 
+                    class="fill-height show"  
+                    :class="{ hide: PGN!==''}"
+                >
+                    <NewGameMenu />
+                </div>
+            
             </v-col>
         </v-row>
         <v-btn
@@ -48,6 +55,7 @@
     import { Chessboard2 } from '@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
     import MoveIndicator from './MoveIndicator.vue'
     import { toProperCase, lastMove, isBlackPiece, isWhitePiece } from './helpers'
+    import NewGameMenu from './NewGameMenu.vue'
 </script>
 
 <script lang="js">
@@ -174,3 +182,15 @@
         }
     }
 </script>
+
+<style>
+    .show {
+        opacity: 1;
+        transition: all 1s ease-in;
+    }
+
+    .hide {
+        opacity: 0;
+        transition: opacity 2s linear;
+    }
+</style>
