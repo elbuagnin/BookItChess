@@ -25,10 +25,17 @@
             <v-col cols="3" class="bg-blue-grey">
                 
                 <div 
-                    class="fill-height show"  
+                    class="fill-height show position-absolute"  
                     :class="{ hide: PGN!==''}"
                 >
                     <NewGameMenu />
+                </div>
+
+                <div 
+                    class="fill-height show position-absolute"  
+                    :class="{ hide: PGN===''}"
+                >
+                    <InGamePanel v-bind="{ game: game }"/>
                 </div>
             
             </v-col>
@@ -56,6 +63,7 @@
     import MoveIndicator from './MoveIndicator.vue'
     import { toProperCase, lastMove, isBlackPiece, isWhitePiece } from './helpers'
     import NewGameMenu from './NewGameMenu.vue'
+import InGamePanel from './InGamePanel.vue'
 </script>
 
 <script lang="js">
@@ -185,11 +193,13 @@
 
 <style>
     .show {
+        z-index: 10;
         opacity: 1;
         transition: all 1s ease-in;
     }
 
     .hide {
+        z-index: 0;
         opacity: 0;
         transition: opacity 2s linear;
     }
