@@ -23,7 +23,7 @@
                 </p>
             </v-col>
             <v-col cols="3" class="bg-blue-grey">
-                
+                taco is {{ blacksLastMove }}
                 <div 
                     class="fill-height show position-absolute"  
                     :class="{ hide: PGN!==''}"
@@ -35,7 +35,7 @@
                     class="fill-height show position-absolute"  
                     :class="{ hide: PGN===''}"
                 >
-                    <InGamePanel v-bind="{ game: game }"/>
+                    <InGamePanel v-bind="{ gameState: gameState }"/>
                 </div>
             
             </v-col>
@@ -61,9 +61,10 @@
     import { Chess } from 'chess.js'
     import { Chessboard2 } from '@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
     import MoveIndicator from './MoveIndicator.vue'
-    import { toProperCase, lastMove, isBlackPiece, isWhitePiece } from './helpers'
+    import { toDisplayCase, lastMove, isBlackPiece, isWhitePiece } from './helpers'
     import NewGameMenu from './NewGameMenu.vue'
-import InGamePanel from './InGamePanel.vue'
+    import InGamePanel from './InGamePanel.vue'
+    import { reactifyObject } from '@vueuse/core'
 </script>
 
 <script lang="js">
@@ -85,6 +86,7 @@ import InGamePanel from './InGamePanel.vue'
     }, 0);
 
     // reactive variables
+    let gameState = ref({})
     let statusMessage = ref('')
     let FEN = ref('')
     let PGN = ref('')
@@ -160,8 +162,12 @@ import InGamePanel from './InGamePanel.vue'
         history = game.history({ verbose: true })
         const whoseMoveName = game.turn() === 'w' ? 'White' : 'Black'
         whoseMove.value = whoseMoveName[0].valueOf().toLowerCase()
-        whitesLastMove.value = lastMove('w', history)
-        blacksLastMove.value = lastMove('b', history)
+        if ( whoseMove.value == 'b' ) {
+            whitesLastMove.value = lastMove('w', history)
+        }
+        if ( whoseMove.value == 'w') {
+            blacksLastMove.value = lastMove('b', history)
+        }
         FEN.value = game.fen()
         PGN.value = game.pgn()
         PGNlist.value = game.pgn( { maxWidth: 6, newline: '|' } ).split('|')
@@ -188,6 +194,7 @@ import InGamePanel from './InGamePanel.vue'
         } else if (game.in_draw()) {
             statusMessage.value = 'Game is drawn by fifty-move rule.'
         }
+        gameState.value = game
     }
 </script>
 

@@ -1,39 +1,39 @@
-import { Color, Chesspiece, Move, Square, SquareState } from '../chess'
+import { Color, PieceSymbol, Move, Square, SquareState } from '../chess'
 
-export function toProperCase (piece: string): Chesspiece {
-    let update: Chesspiece
+
+export function toDisplayCase ( piece ): string {
+    let display: string
     switch (piece) {
         case 'p':
-            update = 'p'
+            display = 'p'
             break;
         case 'k':
-            update = 'K'
+            display = 'K'
             break;
         case 'q':
-            update = 'Q'
+            display = 'Q'
             break;
         case 'r':
-            update = 'R'
+            display = 'R'
             break;
         case 'b':
-            update = 'B'
+            display = 'B'
             break;
         case 'n':
-            update = 'N'
+            display = 'N'
             break;
         default:
             throw new Error('Unknown Input')
     }
     
-    return update 
+    return display 
 }
 
 export function lastMove (color: Color, history: Array<Move>) {
     history.reverse()
-
+    
     for (const move of history) {
         if (move.color == color) {
-            move.piece = toProperCase(move.piece)
             return move
         }
     }
@@ -43,28 +43,24 @@ export function lastMove (color: Color, history: Array<Move>) {
 export function isWhitePiece (piece: string) { return /^w/.test(piece) }
 export function isBlackPiece (piece: string) { return /^b/.test(piece) }
 
-export function whereIsPiece (board:Array<SquareState>, color: Color, piece: Chesspiece):Square {
-    let playerPieces:Array<SquareState> = []
-    let type = piece.toLowerCase()
+export function whereIsPiece (board: Array<SquareState>[], type: PieceSymbol, color: Color):Square | undefined {
+    if ( board ) {
+        let playerPieces: Array<SquareState> = []
 
-    board.forEach((row) => {
-        Object.values(row).forEach(entry => {
-            if ( entry !== null ) {
-                if ( entry.color === color ) {
-                    playerPieces.push(entry)
-                }
-            }
-            
+        board.forEach((row) => {
+            Object.values(row).forEach(entry => {
+                if ( entry ) {
+                    if ( entry.color === color ) {
+                        playerPieces.push(entry)
+                    }
+                }                
+            })
         })
-    })
-    
-    const found = Object.values(playerPieces).find(entry => {
-        return entry.type === type
-    })
-    
-    if ( found == undefined ) {
-        throw new Error('found undefined.')
+        
+        const found = Object.values(playerPieces).find(entry => {
+            return entry ? (entry.type == type) : undefined
+        })
+        
+        return found ? found.square : undefined
     }
-    console.log(found.square)
-    return found.square
 }

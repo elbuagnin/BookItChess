@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Color } from '../chess'
+import { Color, PieceSymbol } from '../chess'
+import { toDisplayCase } from './helpers';
 
     const props = defineProps({
         color: String,
@@ -23,10 +24,16 @@ import { Color } from '../chess'
             return false
         }
     })
+
+    let displayPiece = computed(() => {
+        if ( props.piece ) {
+            return toDisplayCase(props.piece as PieceSymbol)
+        }
+    })
 </script>
 
 <template>
-        <span v-if="castle == false">{{ props.piece }}&nbsp;</span>
+        <span v-if="castle == false">{{ displayPiece }}&nbsp;</span>
         <span v-if="castle == false">{{ props.from }}&nbsp;</span>
         <span v-if="flags=='c'">x</span>
         <span v-if="castle == false">{{ props.to }}&nbsp;</span>
