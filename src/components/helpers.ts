@@ -42,3 +42,25 @@ export function lastMove (color: Color, history: Array<Move>) {
 
 export function isWhitePiece (piece: string) { return /^w/.test(piece) }
 export function isBlackPiece (piece: string) { return /^b/.test(piece) }
+
+export function whereIsPiece (board:Array<Object>, color: Color, piece: Piece) {
+    let playerPieces = []
+    let type = piece.toLowerCase()
+
+    board.forEach((row) => {
+        Object.values(row).forEach(entry => {
+            if ( entry !== null ) {
+                if ( entry.color === color ) {
+                    playerPieces.push(entry)
+                }
+            }
+            
+        })
+    })
+    
+    let found = Object.values(playerPieces).find(entry => {
+        return entry.type === type
+    })
+
+    return found.square
+}
