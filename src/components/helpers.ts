@@ -1,7 +1,7 @@
 import { Color, PieceSymbol, Move, Square, SquareState } from '../chess'
 
 
-export function toDisplayCase ( piece ): string {
+export function toDisplayCase ( piece: PieceSymbol ): string {
     let display: string
     switch (piece) {
         case 'p':
