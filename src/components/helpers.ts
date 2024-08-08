@@ -1,7 +1,7 @@
-import { Color, Piece, Move } from '../chess'
+import { Color, Chesspiece, Move, Square, SquareState } from '../chess'
 
-export function toProperCase (piece: string): Piece {
-    let update: Piece
+export function toProperCase (piece: string): Chesspiece {
+    let update: Chesspiece
     switch (piece) {
         case 'p':
             update = 'p'
@@ -43,8 +43,8 @@ export function lastMove (color: Color, history: Array<Move>) {
 export function isWhitePiece (piece: string) { return /^w/.test(piece) }
 export function isBlackPiece (piece: string) { return /^b/.test(piece) }
 
-export function whereIsPiece (board:Array<Object>, color: Color, piece: Piece) {
-    let playerPieces = []
+export function whereIsPiece (board:Array<SquareState>, color: Color, piece: Chesspiece):Square {
+    let playerPieces:Array<SquareState> = []
     let type = piece.toLowerCase()
 
     board.forEach((row) => {
@@ -58,9 +58,13 @@ export function whereIsPiece (board:Array<Object>, color: Color, piece: Piece) {
         })
     })
     
-    let found = Object.values(playerPieces).find(entry => {
+    const found = Object.values(playerPieces).find(entry => {
         return entry.type === type
     })
-
+    
+    if ( found == undefined ) {
+        throw new Error('found undefined.')
+    }
+    console.log(found.square)
     return found.square
 }
