@@ -5,7 +5,7 @@ import { ref, computed } from 'vue'
 export const useGameStore = defineStore('gameStore', () => {
     const game = ref({} as Chess)
     const currentBoard = computed(() => {
-        game.value.board
+        return game.value.board
     })
 
     return { game, currentBoard }
