@@ -171,7 +171,7 @@
     // update DOM elements with the current game status
     function updateStatus () {
         // update store
-
+        store.game = game
         // Update reactive variables
         history = game.history({ verbose: true })
         const whoseMoveName = game.turn() === 'w' ? 'White' : 'Black'
