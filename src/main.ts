@@ -1,8 +1,10 @@
 import { createApp } from 'vue'
-//import './style.css'
-import '../node_modules/@chrisoakman/chessboard2/dist/chessboard2.min.css'
+import { createPinia } from 'pinia'
+import App from './App.vue'
 
-// Vuetify
+const pinia = createPinia()
+const app = createApp(App)
+
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
@@ -12,10 +14,8 @@ const vuetify = createVuetify({
     directives,
 })
 
-// Pinia
-import { createPinia } from 'pinia'
-const pinia = createPinia()
+import '../node_modules/@chrisoakman/chessboard2/dist/chessboard2.min.css'
 
-import App from './App.vue'
-
-createApp(App).use(vuetify).use(pinia).mount('#app')
+app.use(pinia)
+app.use(vuetify)
+app.mount('#app')

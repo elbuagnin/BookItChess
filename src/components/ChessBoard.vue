@@ -23,7 +23,6 @@
                 </p>
             </v-col>
             <v-col cols="3" class="bg-blue-grey">
-                taco is {{ blacksLastMove }}
                 <div 
                     class="fill-height show position-absolute"  
                     :class="{ hide: PGN!==''}"
@@ -35,7 +34,7 @@
                     class="fill-height show position-absolute"  
                     :class="{ hide: PGN===''}"
                 >
-                    <InGamePanel v-bind="{ gameState: gameState }"/>
+                    <InGamePanel />
                 </div>
             
             </v-col>
@@ -55,19 +54,29 @@
     </v-container>
 </template>
 
-<script setup lang="js">
-    import { ref, computed, toValue } from 'vue'
-    import jquery from 'jquery'
+<script setup lang="ts">
+    // Store
+    import { createPinia } from 'pinia'
+    import { useGameStore } from '../stores/gameStore'
+
+    // Core modules
+    import { ref } from 'vue'
+
+    // Chess modules
     import { Chess } from 'chess.js'
     import { Chessboard2 } from '@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
+
+    // Composables
+    import { lastMove, isBlackPiece, isWhitePiece } from './helpers'
+
+    // Components
     import MoveIndicator from './MoveIndicator.vue'
-    import { toDisplayCase, lastMove, isBlackPiece, isWhitePiece } from './helpers'
     import NewGameMenu from './NewGameMenu.vue'
     import InGamePanel from './InGamePanel.vue'
-    import { reactifyObject } from '@vueuse/core'
+    
 </script>
 
-<script lang="js">
+<script lang="ts">
     // Initialize game and chessboard modules
     const game = new Chess()
 
@@ -79,14 +88,17 @@
         onDrop
     }
 
-    let board = {}
+    let board = {} as Chessboard2
 
     setTimeout(function() {
         board = new Chessboard2('gameBoard', boardConfig);
     }, 0);
 
+    // store
+    const pinia = createPinia()
+    const store = useGameStore(pinia)
+
     // reactive variables
-    let gameState = ref({})
     let statusMessage = ref('')
     let FEN = ref('')
     let PGN = ref('')
@@ -158,6 +170,8 @@
 
     // update DOM elements with the current game status
     function updateStatus () {
+        // update store
+
         // Update reactive variables
         history = game.history({ verbose: true })
         const whoseMoveName = game.turn() === 'w' ? 'White' : 'Black'
@@ -191,10 +205,9 @@
             statusMessage.value = 'Game is drawn by threefold repetition rule.'
         } else if (game.isInsufficientMaterial()) {
             statusMessage.value = 'Game is drawn by insufficient material.'
-        } else if (game.in_draw()) {
+        } else if (game.isDraw()) {
             statusMessage.value = 'Game is drawn by fifty-move rule.'
         }
-        gameState.value = game
     }
 </script>
 
