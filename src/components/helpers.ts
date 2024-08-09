@@ -1,4 +1,10 @@
+import { createPinia } from 'pinia'
+import { useGameStore } from '../stores/gameStore'
 import { Color, PieceSymbol, Move, Square, SquareState } from '../chess'
+
+// store
+const pinia = createPinia()
+const store = useGameStore(pinia)
 
 
 export function toDisplayCase ( piece: PieceSymbol ): string {
@@ -43,11 +49,11 @@ export function lastMove (color: Color, history: Array<Move>) {
 export function isWhitePiece (piece: string) { return /^w/.test(piece) }
 export function isBlackPiece (piece: string) { return /^b/.test(piece) }
 
-export function whereIsPiece (board: Array<SquareState>[], type: PieceSymbol, color: Color):Square | undefined {
-    if ( board ) {
+export function whereIsPiece (type: PieceSymbol, color: Color):Square | undefined {
+    if ( store.currentBoard ) {
         let playerPieces: Array<SquareState> = []
 
-        board.forEach((row) => {
+        store.currentBoard.forEach((row) => {
             Object.values(row).forEach(entry => {
                 if ( entry ) {
                     if ( entry.color === color ) {
