@@ -9,7 +9,8 @@
             </v-col>
             <v-col cols="6" class="bg-blue-grey">
                 <p class="pt-4 text-center text-h3">
-                    <MoveIndicator v-bind="{ color: 'b', whoseMove: whoseMove, check: check, to: blacksLastMove.to, from: blacksLastMove.from, piece: blacksLastMove.piece, flags: blacksLastMove.flags}"/>
+                    <MoveIndicator v-if="blacksLastMove" v-bind="{ color: 'b', whoseMove: whoseMove, check: check, to: blacksLastMove.to, from: blacksLastMove.from, piece: blacksLastMove.piece, flags: blacksLastMove.flags}"/>
+                    <span v-else>&nbsp;</span>
                 </p>
 
                 <v-sheet
@@ -19,7 +20,7 @@
                 ></v-sheet>
 
                 <p class="pb-4 text-center text-h3">
-                    <MoveIndicator v-bind="{ color: 'w', whoseMove: whoseMove, check: check, to: whitesLastMove.to, from: whitesLastMove.from, piece: whitesLastMove.piece, flags: whitesLastMove.flags}"/>    
+                    <MoveIndicator v-if="whitesLastMove" v-bind="{ color: 'w', whoseMove: whoseMove, check: check, to: whitesLastMove.to, from: whitesLastMove.from, piece: whitesLastMove.piece, flags: whitesLastMove.flags}"/>    
                 </p>
             </v-col>
             <v-col cols="3" class="bg-blue-grey">
@@ -34,7 +35,7 @@
                     class="fill-height show position-absolute"  
                     :class="{ hide: PGN===''}"
                 >
-                    <InGamePanel />
+                    <InGamePanel v-bind="{game: game}"/>
                 </div>
             
             </v-col>
@@ -57,35 +58,40 @@
 <script setup lang="ts">
     // Store
     import { createPinia } from 'pinia'
-    import { useGameStore } from '../stores/gameStore'
+    import { chessGame } from '../stores/gameStore'
 
     // Core modules
     import { ref } from 'vue'
 
     // Chess modules
-    import { Chess } from 'chess.js'
-    import { Chessboard2 } from '@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
+    // import { Chess } from 'chess.js'
+    import { Chessboard2 } from '../../node_modules/@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
 
-    // Composables
-    import { lastMove, isBlackPiece, isWhitePiece } from './helpers'
+    // // Composables
+    import { isBlackPiece, isWhitePiece, lastMove } from './helpers'
 
     // Components
     import MoveIndicator from './MoveIndicator.vue'
     import NewGameMenu from './NewGameMenu.vue'
     import InGamePanel from './InGamePanel.vue'
+    import { Color, Move } from 'chess.js'
+    import { FEN_T } from '../chess'
     
 </script>
 
 <script lang="ts">
-    // Initialize game and chessboard modules
-    const game = new Chess()
+    // Initialize game store and chessboard modules
+    const pinia = createPinia()
+    const gameState = chessGame(pinia)
+    const game = gameState.game
 
     const boardConfig = {
         draggable: true,
         showNotation: true,
         position: 'start',
         onDragStart,
-        onDrop
+        onDrop,
+        onSnapEnd
     }
 
     let board = {} as Chessboard2
@@ -94,20 +100,16 @@
         board = new Chessboard2('gameBoard', boardConfig);
     }, 0);
 
-    // store
-    const pinia = createPinia()
-    const store = useGameStore(pinia)
-
     // reactive variables
     let statusMessage = ref('')
-    let FEN = ref('')
+    let FEN = ref('' as FEN_T)
     let PGN = ref('')
-    let PGNlist = ref ([])
-    let whoseMove = ref('')
-    let whitesLastMove = ref({})
-    let blacksLastMove = ref({})
+    let PGNlist = ref ([] as Array<String> )
+    let whoseMove = ref('' as Color)
     let check = ref('')
-    let history = ref([])
+    let history = ref([] as Array<Move>)
+    let blacksLastMove = ref({} as Move)
+    let whitesLastMove = ref({} as Move)
 
     // Start the game
     updateStatus()
@@ -164,25 +166,23 @@
 
     // update the board position after the piece snap
     // for castling, en passant, pawn promotion
-    // function onSnapEnd () {
-    //   board.position(game.fen())
-    // }
+    function onSnapEnd () {
+      board.position(game.fen())
+    }
 
     // update DOM elements with the current game status
     function updateStatus () {
-        // update store
-        store.game = game
         // Update reactive variables
-        history = game.history({ verbose: true })
+        history.value = game.history({ verbose: true })
         const whoseMoveName = game.turn() === 'w' ? 'White' : 'Black'
-        whoseMove.value = whoseMoveName[0].valueOf().toLowerCase()
+        whoseMove.value = game.turn() === 'w' ? 'w' : 'b'
         if ( whoseMove.value == 'b' ) {
-            whitesLastMove.value = lastMove('w', history)
+            whitesLastMove.value = lastMove(history.value)
         }
         if ( whoseMove.value == 'w') {
-            blacksLastMove.value = lastMove('b', history)
+            blacksLastMove.value = lastMove(history.value)
         }
-        FEN.value = game.fen()
+        FEN.value = game.fen() as FEN_T
         PGN.value = game.pgn()
         PGNlist.value = game.pgn( { maxWidth: 6, newline: '|' } ).split('|')
         check.value = ''
