@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Color, PieceSymbol } from '../chess'
+import type { Color, PieceSymbol } from '../chess.d.ts'
 import { toDisplayCase } from './helpers';
 
     const props = defineProps({
@@ -33,10 +33,10 @@ import { toDisplayCase } from './helpers';
 </script>
 
 <template>
-        <span v-if="castle == false">{{ displayPiece }}&nbsp;</span>
-        <span v-if="castle == false">{{ props.from }}&nbsp;</span>
+        <span v-if="castle == false && displayPiece">{{ displayPiece }}&nbsp;</span>
+        <span v-if="castle == false && props.from">{{ props.from }}&nbsp;</span>
         <span v-if="flags=='c'">x</span>
-        <span v-if="castle == false">{{ props.to }}&nbsp;</span>
+        <span v-if="castle == false && props.to">{{ props.to }}&nbsp;</span>
         <span v-if="props.check == opponentColor(props.color as Color)">+</span>
         <span v-if="flags == 'k'">O-O</span>
         <span v-if="flags == 'q'">O-O-O</span>
