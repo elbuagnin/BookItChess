@@ -12,12 +12,12 @@
                     <MoveIndicator v-if="blacksLastMove" v-bind="{ color: 'b', whoseMove: whoseMove, check: check, to: blacksLastMove.to, from: blacksLastMove.from, piece: blacksLastMove.piece, flags: blacksLastMove.flags}"/>
                     <span v-else>&nbsp;</span>
                 </p>
-
                 <v-sheet
                     id="gameBoard"
-                    style="width: 400px;"
+                    style="width: 400px; z-index: 0; position: static;"
                     class="mx-auto py-4 bg-transparent"
-                ></v-sheet>
+                >
+                </v-sheet>
 
                 <p class="pb-4 text-center text-h3">
                     <MoveIndicator v-if="whitesLastMove" v-bind="{ color: 'w', whoseMove: whoseMove, check: check, to: whitesLastMove.to, from: whitesLastMove.from, piece: whitesLastMove.piece, flags: whitesLastMove.flags}"/>    
@@ -35,7 +35,7 @@
                     class="fill-height show position-absolute"  
                     :class="{ hide: PGN===''}"
                 >
-                    <InGamePanel v-bind="{game: game}"/>
+                    <InGamePanel v-bind="{oppKingAttackedSquares: oppKingAttackedSquares}" />
                 </div>
             
             </v-col>
@@ -56,26 +56,28 @@
 </template>
 
 <script setup lang="ts">
+    // Type
+    import type { Square, Color, Move } from 'chess.js'
+    import { FEN_T } from '../chess'
+
     // Store
     import { createPinia } from 'pinia'
     import { chessGame } from '../stores/gameStore'
 
     // Core modules
-    import { ref } from 'vue'
+    import { ref, computed } from 'vue'
 
     // Chess modules
     // import { Chess } from 'chess.js'
     import { Chessboard2 } from '../../node_modules/@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
 
     // // Composables
-    import { isBlackPiece, isWhitePiece, lastMove } from './helpers'
+    import { isBlackPiece, isWhitePiece, lastMove, whereIsPiece, adjSquares } from './helpers'
 
     // Components
     import MoveIndicator from './MoveIndicator.vue'
     import NewGameMenu from './NewGameMenu.vue'
     import InGamePanel from './InGamePanel.vue'
-    import { Color, Move } from 'chess.js'
-    import { FEN_T } from '../chess'
     
 </script>
 
@@ -111,6 +113,39 @@
     let blacksLastMove = ref({} as Move)
     let whitesLastMove = ref({} as Move)
 
+    // Analysis Functions
+    let turn = computed((): Color | undefined => {
+        return game?.turn()
+    })
+
+    let opponent = computed((): Color | undefined => {
+        return turn.value==='w' ? 'b' : 'w'
+    })
+
+    let oppKingPos = computed((): Square | undefined => {
+        return whereIsPiece( game?.board(), 'k', opponent.value)
+    })
+
+    let oppKingAdjOpenSquares = computed(() => {
+        const openSquares = [] as Array<Square>
+        adjSquares(oppKingPos.value)?.forEach( sq => {
+            if ( !game?.get(sq) ) {
+                openSquares.push(sq)
+            }
+        })
+        return openSquares
+    })
+
+    let oppKingAttackedSquares = computed(() => {
+        const attackedSquares = [] as Array<object>
+        oppKingAdjOpenSquares.value.forEach(sq => {
+            if ( game?.isAttacked(sq, turn.value) ) {
+                attackedSquares.push(sq)
+            }
+        })
+        return attackedSquares
+    })
+
     // Start the game
     updateStatus()
 
@@ -121,7 +156,7 @@
         updateStatus()
     }
 
-    // Chess Event functions
+    // Chess Game Play Event functions
     function onDragStart (dragStartEvt) {
         // do not pick up pieces if the game is over
         if (game.isGameOver()) return false
