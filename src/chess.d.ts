@@ -23,5 +23,5 @@ export type FEN_T = `{string & { __brand: "/^(?:(?:[PNBRQK]+|[1-8])\/){7}(?:[PNB
 //     color: Color
 // }
 import type * as Chess from "chess.js"
-export type SquareState = ({ square: Square; type: PieceSymbol; color: Color; } | null)
+export type SquareState = ({ square: Square; type: PieceSymbol; color: Color; } | null | undefined )
 export * from "chess.js"
