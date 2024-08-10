@@ -35,7 +35,7 @@
                     class="fill-height show position-absolute"  
                     :class="{ hide: PGN===''}"
                 >
-                    <InGamePanel />
+                    <InGamePanel v-bind="{game: game}"/>
                 </div>
             
             </v-col>
