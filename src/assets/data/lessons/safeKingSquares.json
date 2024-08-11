@@ -1,0 +1,17 @@
+{
+    "id": "SKSq",
+    "name": "Safe King Squares",
+    "category": "defense",
+    "pattern": "aaaakaaaa",
+    "sequence": [
+        {
+            "instruction": "Mark all of the squares that are safe for your king to move to.",
+            "do": {
+                "what": "mark",
+                "quality": "safe",
+                "player": "self",
+                "piece": "k"
+            }
+        }
+    ]
+}

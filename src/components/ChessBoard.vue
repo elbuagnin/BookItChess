@@ -40,6 +40,15 @@
             
             </v-col>
         </v-row>
+        <v-row
+            no-gutters
+            class="bg-blue-grey h-25 border-thin p-4"
+            
+        >
+            <v-col>
+                <v-sheet>{{ lessonText }}</v-sheet>
+            </v-col>
+        </v-row>
         <v-btn
             id="startBtn"
             @click="setStartPos()"
@@ -73,7 +82,8 @@
 
     // // Composables
     import { isBlackPiece, isWhitePiece, lastMove, whereIsPiece, adjSquares } from './helpers'
-
+    import { lesson } from './trainer'
+    
     // Components
     import MoveIndicator from './MoveIndicator.vue'
     import NewGameMenu from './NewGameMenu.vue'
@@ -93,7 +103,9 @@
         position: 'start',
         onDragStart,
         onDrop,
-        onSnapEnd
+        onSnapEnd,
+        onMousedownSquare: logMousedownSquare,
+
     }
 
     let board = {} as Chessboard2
@@ -104,6 +116,7 @@
 
     // reactive variables
     let statusMessage = ref('')
+    let lessonText = ref('')
     let FEN = ref('' as FEN_T)
     let PGN = ref('')
     let PGNlist = ref ([] as Array<String> )
@@ -146,6 +159,20 @@
         return attackedSquares
     })
 
+    // Player Aux Interface
+    function markPlayerSelection (square: Square) {
+        board.addCircle(square)
+    }
+
+    function clearMarks () {
+        board.clearCircles()
+    }
+
+    function logMousedownSquare (evt, domEvt) {
+        const { square } = evt
+        markPlayerSelection(square)
+    }
+    
     // Start the game
     updateStatus()
 
@@ -243,6 +270,9 @@
         } else if (game.isDraw()) {
             statusMessage.value = 'Game is drawn by fifty-move rule.'
         }
+
+        // run a lesson if needed
+        lesson()
     }
 </script>
 
