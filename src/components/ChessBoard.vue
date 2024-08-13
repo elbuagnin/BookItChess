@@ -42,11 +42,16 @@
         </v-row>
         <v-row
             no-gutters
-            class="bg-blue-grey h-25 border-thin p-4"
-            
+            class="border-t-sm"
         >
-            <v-col>
-                <v-sheet>{{ lessonText }}</v-sheet>
+            <v-col
+                class="mx-auto"
+            >
+                <v-sheet
+                    class="px-8 py-4 bg-blue-grey-darken-3"
+                >
+                    {{ activityText }}
+                </v-sheet>
             </v-col>
         </v-row>
         <v-btn
@@ -66,8 +71,9 @@
 
 <script setup lang="ts">
     // Type
-    import type { Square, Color, Move } from 'chess.js'
-    import { FEN_T } from '../chess'
+    import type { Square, Color, Move, PieceSymbol } from 'chess.js'
+    import type { FEN_T } from '../chess'
+    import type { Activity } from '../main'
 
     // Store
     import { createPinia } from 'pinia'
@@ -81,9 +87,10 @@
     import { Chessboard2 } from '../../node_modules/@chrisoakman/chessboard2/dist/chessboard2.min.mjs'
 
     // // Composables
-    import { isBlackPiece, isWhitePiece, lastMove, whereIsPiece, adjSquares } from './helpers'
-    import { lesson } from './trainer'
-    
+    import { isBlackPiece, isWhitePiece, lastMove, findPiece, adjacentSquares } from './helpers'
+    import { activityPlans } from './trainer'
+    import { ActivityUserMove, ActivityMarkSquares } from './activities'
+
     // Components
     import MoveIndicator from './MoveIndicator.vue'
     import NewGameMenu from './NewGameMenu.vue'
@@ -96,6 +103,7 @@
     const pinia = createPinia()
     const gameState = chessGame(pinia)
     const game = gameState.game
+    let board = gameState.board
 
     const boardConfig = {
         draggable: true,
@@ -108,15 +116,15 @@
 
     }
 
-    let board = {} as Chessboard2
+    // let board = {} as Chessboard2
 
     setTimeout(function() {
-        board = new Chessboard2('gameBoard', boardConfig);
+        board = new Chessboard2('gameBoard', boardConfig)
+        //board = new Chessboard2('gameBoard', boardConfig);
     }, 0);
 
     // reactive variables
     let statusMessage = ref('')
-    let lessonText = ref('')
     let FEN = ref('' as FEN_T)
     let PGN = ref('')
     let PGNlist = ref ([] as Array<String> )
@@ -126,42 +134,14 @@
     let blacksLastMove = ref({} as Move)
     let whitesLastMove = ref({} as Move)
 
-    // Analysis Functions
-    let turn = computed((): Color | undefined => {
-        return game?.turn()
-    })
-
-    let opponent = computed((): Color | undefined => {
-        return turn.value==='w' ? 'b' : 'w'
-    })
-
-    let oppKingPos = computed((): Square | undefined => {
-        return whereIsPiece( game?.board(), 'k', opponent.value)
-    })
-
-    let oppKingAdjOpenSquares = computed(() => {
-        const openSquares = [] as Array<Square>
-        adjSquares(oppKingPos.value)?.forEach( sq => {
-            if ( !game?.get(sq) ) {
-                openSquares.push(sq)
-            }
-        })
-        return openSquares
-    })
-
-    let oppKingAttackedSquares = computed(() => {
-        const attackedSquares = [] as Array<object>
-        oppKingAdjOpenSquares.value.forEach(sq => {
-            if ( game?.isAttacked(sq, turn.value) ) {
-                attackedSquares.push(sq)
-            }
-        })
-        return attackedSquares
-    })
+    // programatic variables
+    let activity = {} as Activity | undefined
+    let lastActivity = {} as Activity | undefined
+    let activityText = ref('')
 
     // Player Aux Interface
-    function markPlayerSelection (square: Square) {
-        board.addCircle(square)
+    function addCircle (square: Square, color='grey', opacity='1', size='1') {
+        board.addCircle({square: square, color: color, opacity: opacity, size: size})
     }
 
     function clearMarks () {
@@ -169,8 +149,16 @@
     }
 
     function logMousedownSquare (evt, domEvt) {
-        const { square } = evt
-        markPlayerSelection(square)
+        if ( activity.constructor.name === 'ActivityMarkSquares' ) {
+            if (activity.active === true) {
+                const { square } = evt
+                activity.square = square
+                activityText.value = activity.message   
+                if (activity.result === true) {
+                    addCircle(square, 'green', '0.5', 'large')
+                }
+            }
+        }
     }
     
     // Start the game
@@ -272,7 +260,32 @@
         }
 
         // run a lesson if needed
-        lesson()
+        if ( activity ) {
+            lastActivity = activity.constructor.name
+        }
+        //console.log(activity.constructor.name)
+        activityPlans.forEach((activityPlan) => {
+            const triggers = activityPlan.triggered
+            if ( (game.moveNumber() > triggers.afterTurn) && (game.moveNumber() < triggers.beforeTurn) ) {
+                console.log('here', triggers.afterTurn, game.moveNumber())
+                const { action, script } = activityPlan
+                    switch ( action ) {
+                    case 'mark':
+                        if (lastActivity !== 'ActivityMarkSquares') {
+                            activity = new ActivityMarkSquares( game, script )
+                            activityText.value = activity.message
+                        }
+                        break
+                    default:
+                        activity = { active: false }
+                        // play move
+                }
+            } else if (game.moveNumber() > triggers.beforeTurn) {
+                activity.end()
+            } else {
+                activity = new ActivityUserMove( game )
+            }
+        })      
     }
 </script>
 

@@ -2,16 +2,26 @@
     "id": "SKSq",
     "name": "Safe King Squares",
     "category": "defense",
-    "pattern": "aaaakaaaa",
-    "sequence": [
-        {
-            "instruction": "Mark all of the squares that are safe for your king to move to.",
-            "do": {
-                "what": "mark",
-                "quality": "safe",
-                "player": "self",
-                "piece": "k"
-            }
-        }
-    ]
+    "action": "mark",
+    "triggered": {
+        "pattern": "aaaakaaaa",
+        "afterTurn": 4,
+        "beforeTurn": 6
+    },
+    "script": {
+        "messages": {
+            "start": "Mark all of the squares that are safe for your king to move to.",
+            "hint": "There are `${n}` safe squares altogether.",
+            "correct": "Correct",
+            "attacked": "That square is under attack.",
+            "invalid": "That is an invalid move.",
+            "end": "You found them all.",
+            "continue": "Continue play."
+        },
+        "params": {
+            "kind": "safe",
+            "player": "user",
+            "piece": "k"
+        } 
+    }
 }

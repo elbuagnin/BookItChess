@@ -1,4 +1,4 @@
-import type { Color, PieceSymbol, Move, Square, SquareState } from '../chess.d.ts'
+import type { Color, PieceSymbol, Move, Square, SquareState, Chess } from '../chess.d.ts'
 
 export function toDisplayCase ( piece: PieceSymbol ): string {
     let display: string
@@ -28,6 +28,10 @@ export function toDisplayCase ( piece: PieceSymbol ): string {
     return display 
 }
 
+export function opponent(turn: Color): Color {
+    return turn==='w' ? 'b' : 'w'
+}
+
 export function lastMove ( history: Array<Move>):Move {
     let offset = -1
     return history[history.length + offset]
@@ -36,9 +40,9 @@ export function lastMove ( history: Array<Move>):Move {
 export function isWhitePiece (piece: string) { return /^w/.test(piece) }
 export function isBlackPiece (piece: string) { return /^b/.test(piece) }
 
-export function whereIsPiece (board:Array<Array<SquareState>>, type: PieceSymbol, color: Color):Square | undefined {
+export function findPiece (board:Array<Array<SquareState>>, type: PieceSymbol, color: Color):Square | undefined {
     let playerPieces: Array<SquareState> = []
-
+    
     board.forEach((row: Array<SquareState>) => {
         Object.values(row).forEach(entry => {
             if ( entry ) {
@@ -56,7 +60,7 @@ export function whereIsPiece (board:Array<Array<SquareState>>, type: PieceSymbol
     return found ? found.square : undefined
 }
 
-export function adjSquares(square: Square | undefined): Array<Square> | undefined {
+export function adjacentSquares(square: Square | undefined): Array<Square> | undefined {
     if ( square ) {
         const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
         const rows = ['1', '2', '3', '4', '5', '6', '7', '8']
@@ -95,4 +99,34 @@ export function adjSquares(square: Square | undefined): Array<Square> | undefine
         })
     }
     return undefined
+}
+
+export function openSquares(game: Chess, candidates: Array<Square>) {
+    const squares = [] as Array<Square>
+    candidates.forEach((sq) => {
+        if ( game.get(sq) === false ) {
+            squares.push(sq)
+        }
+    })
+    return squares
+}
+
+export function attackedSquares(game: Chess, candidates: Array<Square>, byWhom: Color) {
+    const squares = [] as Array<Square>
+    candidates.forEach(sq => {
+        if (game.isAttacked(sq, byWhom)) {
+            squares.push(sq)
+        }
+    })
+    return squares
+}
+
+export function safeSquares(game: Chess, candidates: Array<Square>, byWhom: Color) {
+    const squares = [] as Array<Square>
+    candidates.forEach(sq => {
+        if (!game.isAttacked(sq, byWhom)) {
+            squares.push(sq)
+        }
+    })
+    return squares
 }
