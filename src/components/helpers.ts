@@ -62,7 +62,7 @@ export function findPiece (board:Array<Array<SquareState>>, type: PieceSymbol, c
 
 export function adjacentSquares(square: Square | undefined): Array<Square> | undefined {
     if ( square ) {
-        const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+        const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         const rows = ['1', '2', '3', '4', '5', '6', '7', '8']
         const adjSquares = [] as Array<Square>
         const tryRows = [] as Array<string>
@@ -83,7 +83,7 @@ export function adjacentSquares(square: Square | undefined): Array<Square> | und
             tryCols.push( cols[ cols.indexOf( col ) - 1 ] )
         }
         tryCols.push( col )
-        if ( col !== 'g' ) {
+        if ( col !== 'h' ) {
             tryCols.push( cols[ cols.indexOf( col ) + 1 ] )
         }
 

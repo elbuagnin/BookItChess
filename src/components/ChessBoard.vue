@@ -95,6 +95,7 @@
     import MoveIndicator from './MoveIndicator.vue'
     import NewGameMenu from './NewGameMenu.vue'
     import InGamePanel from './InGamePanel.vue'
+import patternMatcher from './patternMatcher'
     
 </script>
 
@@ -266,6 +267,7 @@
         //console.log(activity.constructor.name)
         activityPlans.forEach((activityPlan) => {
             const triggers = activityPlan.triggered
+            console.log('trigger pattern: ', patternMatcher(game, 'k', game.turn(), triggers.pattern))
             if ( (game.moveNumber() > triggers.afterTurn) && (game.moveNumber() < triggers.beforeTurn) ) {
                 console.log('here', triggers.afterTurn, game.moveNumber())
                 const { action, script } = activityPlan
@@ -281,7 +283,7 @@
                         // play move
                 }
             } else if (game.moveNumber() > triggers.beforeTurn) {
-                activity.end()
+                //activity.end()
             } else {
                 activity = new ActivityUserMove( game )
             }
