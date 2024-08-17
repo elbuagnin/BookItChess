@@ -51,6 +51,15 @@
                     class="px-8 py-4 bg-blue-grey-darken-3"
                 >
                     {{ activityText }}
+                
+                    <v-text-field v-if="userAnswer"
+                        hide-details="auto"
+                        label="Answer"
+                        v-model = "activityAnswer"
+                        id="activityAnswer"
+                        onchange="sendAnswer()"
+                    >
+                    </v-text-field>
                 </v-sheet>
             </v-col>
         </v-row>
@@ -89,13 +98,14 @@
     // // Composables
     import { isBlackPiece, isWhitePiece, lastMove, findPiece, adjacentSquares } from './helpers'
     import { activityPlans } from './trainer'
-    import { ActivityUserMove, ActivityMarkSquares } from './activities'
+    import { ActivityCount, ActivityUserMove, ActivityMarkSquares } from './activities'
+    import triggered from './triggered.ts'
+    import patternMatcher from './patternMatcher.ts'
 
     // Components
     import MoveIndicator from './MoveIndicator.vue'
     import NewGameMenu from './NewGameMenu.vue'
     import InGamePanel from './InGamePanel.vue'
-import patternMatcher from './patternMatcher'
     
 </script>
 
@@ -117,6 +127,9 @@ import patternMatcher from './patternMatcher'
 
     }
 
+    let answerForm = document.querySelector('#activityAnswer')
+    answerForm?.addEventListener('onchange',sendAnswer(activityAnswer))
+
     // let board = {} as Chessboard2
 
     setTimeout(function() {
@@ -134,11 +147,13 @@ import patternMatcher from './patternMatcher'
     let history = ref([] as Array<Move>)
     let blacksLastMove = ref({} as Move)
     let whitesLastMove = ref({} as Move)
+    let activityAnswer = ref('')
 
     // programatic variables
     let activity = {} as Activity | undefined
     let lastActivity = {} as Activity | undefined
     let activityText = ref('')
+    let userAnswer = false
 
     // Player Aux Interface
     function addCircle (square: Square, color='grey', opacity='1', size='1') {
@@ -159,6 +174,12 @@ import patternMatcher from './patternMatcher'
                     addCircle(square, 'green', '0.5', 'large')
                 }
             }
+        }
+    }
+
+    export function sendAnswer (answer) {
+        if ( activity.constructor.name === 'ActivityCount' ) {
+            console.log(answer)
         }
     }
     
@@ -266,10 +287,11 @@ import patternMatcher from './patternMatcher'
         }
         //console.log(activity.constructor.name)
         activityPlans.forEach((activityPlan) => {
-            const triggers = activityPlan.triggered
+            const triggers = activityPlan.triggered.tests
             console.log('trigger pattern: ', patternMatcher(game, 'k', game.turn(), triggers.pattern))
-            if ( (game.moveNumber() > triggers.afterTurn) && (game.moveNumber() < triggers.beforeTurn) ) {
-                console.log('here', triggers.afterTurn, game.moveNumber())
+            
+            if ( triggered( game, triggers )) {
+                
                 const { action, script } = activityPlan
                     switch ( action ) {
                     case 'mark':
@@ -277,6 +299,11 @@ import patternMatcher from './patternMatcher'
                             activity = new ActivityMarkSquares( game, script )
                             activityText.value = activity.message
                         }
+                        break
+                    case 'count':
+                        activity = new ActivityCount ( game, script )
+                        activityText.value = activity.message
+                        userAnswer = true
                         break
                     default:
                         activity = { active: false }

@@ -4,9 +4,15 @@
     "category": "defense",
     "action": "mark",
     "triggered": {
-        "pattern": "aaaakaaaa",
-        "afterTurn": 4,
-        "beforeTurn": 6
+        "tests": [
+            {
+                "kind": "adjacent attacked squares",
+                "piece": "k",
+                "min": 1,
+                "player": "user"
+            }
+        ],
+        "after turn": 4
     },
     "script": {
         "messages": {

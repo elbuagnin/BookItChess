@@ -1,0 +1,32 @@
+{
+    "id": "ccmv",
+    "name": "Count Check Moves",
+    "category": "offense",
+    "action": "count",
+    "triggered": {
+        "tests": [
+            {
+                "kind": "check moves",
+                "piece": "k",
+                "min": 0,
+                "player": "opponent"
+            }
+        ],
+        "after turn": 4
+    },
+    "script": {
+        "messages": {
+            "start": "How pieces can delivery a check?",
+            "hint": "There are `${n}` check moves altogether.",
+            
+            
+            "end": "That is the correct count.",
+            "continue": "Continue play."
+        },
+        "params": {
+            "kind": "check",
+            "player": "opponent",
+            "piece": "k"
+        } 
+    }
+}
