@@ -2,10 +2,8 @@
     <v-container>
         <v-row no-gutters>
             <v-col cols="3" class="pl-4 pt-4 bg-blue-grey">
-                <p v-for="turn in PGNlist"
-                class="text-left"
-                style="overflow: scroll;"    
-            >{{ turn }}</p>
+                <pgnTurnList :PGNlist="PGNlist"/>
+                
             </v-col>
             <v-col cols="6" class="bg-blue-grey">
                 <p class="pt-4 text-center text-h3">
@@ -108,9 +106,10 @@
     import { activityPlans } from './trainer'
     import { ActivityCount, ActivityUserMove, ActivityMarkSquares } from './activities'
     import triggered from './triggered.ts'
-    import patternMatcher from './patternMatcher.ts'
+    //import patternMatcher from './patternMatcher.ts'
 
     // Components
+    import pgnTurnList from './pgnTurnList.vue'
     import MoveIndicator from './MoveIndicator.vue'
     import NewGameMenu from './NewGameMenu.vue'
     import InGamePanel from './InGamePanel.vue'    
