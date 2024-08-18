@@ -1,5 +1,6 @@
 import { Chess, Color, Square } from "chess.js";
 import { adjacentSquares, attackedSquares, findPiece, opponent } from "./helpers";
+import findChecks from "./findChecks";
 
 function whichColor (game: Chess, player: string) {
     const userColor = game.turn()
@@ -14,9 +15,8 @@ export default function triggered(game: Chess, triggers: Array<object>): boolean
     let square = '' as Square
     let adjacent = [] as Array<Square>
     let attacked = [] as Array<Square>
-    //let attackers = [] as Array<Square>
 
-    let allTests = true
+    let result = false
 
     triggers.forEach(test => {
         switch (test.kind) {
@@ -27,29 +27,21 @@ export default function triggered(game: Chess, triggers: Array<object>): boolean
                 adjacent = adjacentSquares( square )
                 attacked = attackedSquares( game, adjacent, opp )
                 
-                if ( attacked.length < test.min ) {
-                    allTests = false
-                    break
+                if ( attacked.length >= test.min ) {
+                    result = true
                 }
-
+                break
             case 'opponent adjacent attacked squares':
                 break
 
             case 'checks':
-                color = whichColor(game, test.player)
-                opp = opponent( color )
-                square = findPiece(game.board(), 'k', opp)
-
-                if ( !game.isAttacked( square )) {
-                    allTests = false
-                    break
+                if ( findChecks(game).length > 0 ) {
+                    result = true
                 }
+                break
                 
         }
     })
-    if ( allTests === true ) {
-        return true
-    } else {
-        return false
-    }
+    
+    return result
 }

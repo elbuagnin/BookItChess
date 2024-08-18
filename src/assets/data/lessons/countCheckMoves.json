@@ -16,7 +16,7 @@
     },
     "script": {
         "messages": {
-            "start": "How pieces can delivery a check?",
+            "start": "How many pieces can delivery a check?",
             "hint": "There are `${n}` check moves altogether.",
             
             

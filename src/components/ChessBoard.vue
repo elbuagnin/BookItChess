@@ -48,18 +48,26 @@
                 class="mx-auto"
             >
                 <v-sheet
-                    class="px-8 py-4 bg-blue-grey-darken-3"
+                    class="px-8 pt-4 bg-blue-grey-darken-3"
+                    style="display: flex; min-height: 4rem;"
                 >
-                    {{ activityText }}
-                
-                    <v-text-field v-if="userAnswer"
-                        hide-details="auto"
-                        label="Answer"
-                        v-model = "activityAnswer"
-                        id="activityAnswer"
-                        onchange="sendAnswer()"
+                    <span
+                        class="pt-2 mr-4"
                     >
-                    </v-text-field>
+                        {{ activityText }}
+                    </span>
+                    <span v-if="askActivityCount">
+                        <v-select
+                        width="6rem"
+                        lines="one"
+                        density="compact"
+                        
+                        :items="answerCounts"
+                        item-title="title"
+                        item-value="value"
+                        @update:model-value="sendAnswer"
+                        ></v-select>
+                    </span>
                 </v-sheet>
             </v-col>
         </v-row>
@@ -105,8 +113,7 @@
     // Components
     import MoveIndicator from './MoveIndicator.vue'
     import NewGameMenu from './NewGameMenu.vue'
-    import InGamePanel from './InGamePanel.vue'
-    
+    import InGamePanel from './InGamePanel.vue'    
 </script>
 
 <script lang="ts">
@@ -127,8 +134,7 @@
 
     }
 
-    let answerForm = document.querySelector('#activityAnswer')
-    answerForm?.addEventListener('onchange',sendAnswer(activityAnswer))
+    
 
     // let board = {} as Chessboard2
 
@@ -147,13 +153,22 @@
     let history = ref([] as Array<Move>)
     let blacksLastMove = ref({} as Move)
     let whitesLastMove = ref({} as Move)
-    let activityAnswer = ref('')
 
     // programatic variables
     let activity = {} as Activity | undefined
+    let currentActivityAction = ''
     let lastActivity = {} as Activity | undefined
     let activityText = ref('')
-    let userAnswer = false
+    let askActivityCount = false
+    const answerCounts = [
+        { title: '', value: null},
+        { title: '0', value: 0},
+        { title: '1', value: 1},
+        { title: '2', value: 2},
+        { title: '3', value: 3},
+        { title: '4', value: 4},
+        { title: '5', value: 5}
+    ]
 
     // Player Aux Interface
     function addCircle (square: Square, color='grey', opacity='1', size='1') {
@@ -165,23 +180,31 @@
     }
 
     function logMousedownSquare (evt, domEvt) {
-        if ( activity.constructor.name === 'ActivityMarkSquares' ) {
-            if (activity.active === true) {
-                const { square } = evt
-                activity.square = square
-                activityText.value = activity.message   
-                if (activity.result === true) {
-                    addCircle(square, 'green', '0.5', 'large')
-                }
+        console.log('event logMouse activated')
+        console.log(currentActivityAction)
+        if ( currentActivityAction === 'mark' ) {  
+            console.log('yes it is')          
+            const { square } = evt
+            console.log('event square is ', square)
+            console.log(activity)
+            activity.square = square
+            activityText.value = activity.message   
+            if (activity.result === true) {
+                addCircle(square, 'green', '0.5', 'large')
             }
         }
     }
 
-    export function sendAnswer (answer) {
-        if ( activity.constructor.name === 'ActivityCount' ) {
-            console.log(answer)
+    function sendAnswer (event) {
+        if (currentActivityAction === 'count') {
+                if (Number.isInteger(event)) {
+                console.log(event)
+                activity.answer = event
+                activityText.value = activity.message
+            }
         }
     }
+    
     
     // Start the game
     updateStatus()
@@ -283,19 +306,23 @@
 
         // run a lesson if needed
         if ( activity ) {
-            lastActivity = activity.constructor.name
+            lastActivity = currentActivityAction
         }
-        //console.log(activity.constructor.name)
+        console.log(currentActivityAction)
+        console.log('plans', activityPlans)
         activityPlans.forEach((activityPlan) => {
+            console.log('plan', activityPlan.action)
             const triggers = activityPlan.triggered.tests
-            console.log('trigger pattern: ', patternMatcher(game, 'k', game.turn(), triggers.pattern))
-            
+            console.log('triggers', triggers)
             if ( triggered( game, triggers )) {
-                
+                console.log('triggered')
+                currentActivityAction = activityPlan.action
                 const { action, script } = activityPlan
+                console.log('action', action)
                     switch ( action ) {
                     case 'mark':
-                        if (lastActivity !== 'ActivityMarkSquares') {
+                        if (lastActivity !== '') {
+                            console.log('new mark activity')
                             activity = new ActivityMarkSquares( game, script )
                             activityText.value = activity.message
                         }
@@ -303,7 +330,7 @@
                     case 'count':
                         activity = new ActivityCount ( game, script )
                         activityText.value = activity.message
-                        userAnswer = true
+                        askActivityCount = true
                         break
                     default:
                         activity = { active: false }
@@ -312,6 +339,7 @@
             } else if (game.moveNumber() > triggers.beforeTurn) {
                 //activity.end()
             } else {
+                //currentActivityAction = 'move'
                 activity = new ActivityUserMove( game )
             }
         })      

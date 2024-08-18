@@ -38,7 +38,7 @@ export const ActivityMarkSquares = class {
 
     constructor(game: Chess, script: {messages: Communication, params: Params}) {
         this.game = game
-    
+        console.log('Here in user mark squares')
         const { messages: messages, params: params } = script
 
         this.kind = params.kind
@@ -90,6 +90,8 @@ export const ActivityMarkSquares = class {
 
     set square(x: Square) {
         //this.square = x
+        console.log('square set')
+        console.log('user', x, 'comp', this.squaresOfInterest)
         if ( this.squaresOfInterest.find((e) => {
             return e === x
             })

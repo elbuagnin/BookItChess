@@ -6,6 +6,7 @@ export default function findChecks(game: Chess) {
 
     const checkMoves = moves.filter(move => {
         const mo = trial.move(move)
+        console.log('move object', mo)
         if ( mo ) {
             console.log( mo )
             if ( trial.inCheck() === true ) {
@@ -14,5 +15,6 @@ export default function findChecks(game: Chess) {
         }
     })
 
+    console.log('check moves', checkMoves.length)
     return checkMoves
 }
